@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <style>
+    body { background: white; font-family: Arial, sans-serif; color: black; }
+    h1 { text-align:center; }
+    .wrap { width: 95%; margin: 20px auto; }
+    .stats { display:flex; gap:12px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+    .card { border:1px solid #ddd; border-radius: 10px; padding: 10px 14px; min-width: 160px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid black; padding: 8px; vertical-align: top; }
+    th { background: #f2f2f2; }
+    img { border-radius: 6px; border:1px solid #ddd; }
+    .filters { border:1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 14px; }
+    .filters input, .filters select { padding: 6px; margin-right: 8px; }
+    .small { font-size: 12px; color: #444; }
+    form.inline { display:inline-block; margin:0; }
+    button { padding: 6px 10px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Civic Reports Dashboard</h1>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="card"><b>Total</b><br>{{ total }}</div>
+      <div class="card"><b>New</b><br>{{ new_count }}</div>
+      <div class="card"><b>Resolved</b><br>{{ resolved_count }}</div>
+      <div class="card"><b>Potholes</b><br>{{ potholes }}</div>
+      <div class="card"><b>Garbage</b><br>{{ garbage }}</div>
+      <div class="card"><b>Open Manholes</b><br>{{ manhole }}</div>
+      <div class="card"><b>Broken Roads</b><br>{{ road }}</div>
+    </div>
+
+    <div class="filters">
+      <form method="get" action="/dashboard">
+        <select name="issue">
+          <option value="">All Issues</option>
+          <option value="Pothole" {{ 'selected' if q_issue=='Pothole' else '' }}>Pothole</option>
+          <option value="Garbage" {{ 'selected' if q_issue=='Garbage' else '' }}>Garbage</option>
+          <option value="Open Manhole" {{ 'selected' if q_issue=='Open Manhole' else '' }}>Open Manhole</option>
+          <option value="Broken Road" {{ 'selected' if q_issue=='Broken Road' else '' }}>Broken Road</option>
+        </select>
+
+        <select name="status">
+          <option value="">All Status</option>
+          <option value="New" {{ 'selected' if q_status=='New' else '' }}>New</option>
+          <option value="In Review" {{ 'selected' if q_status=='In Review' else '' }}>In Review</option>
+          <option value="Assigned" {{ 'selected' if q_status=='Assigned' else '' }}>Assigned</option>
+          <option value="Resolved" {{ 'selected' if q_status=='Resolved' else '' }}>Resolved</option>
+        </select>
+
+        <select name="severity">
+          <option value="">All Severity</option>
+          <option value="Low" {{ 'selected' if q_severity=='Low' else '' }}>Low</option>
+          <option value="Medium" {{ 'selected' if q_severity=='Medium' else '' }}>Medium</option>
+          <option value="High" {{ 'selected' if q_severity=='High' else '' }}>High</option>
+        </select>
+
+        <input type="text" name="search" value="{{ q_search }}" placeholder="Search location/description">
+        <button type="submit">Filter</button>
+        <a href="/dashboard" style="margin-left:10px;">Reset</a>
+      </form>
+      <div class="small">Tip: Update report status + department from the table.</div>
+    </div>
+
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Issue</th>
+        <th>Severity</th>
+        <th>Status / Department</th>
+        <th>Location</th>
+        <th>Description</th>
+        <th>GPS</th>
+        <th>Image</th>
+        <th>Time</th>
+      </tr>
+
+      {% for r in reports %}
+      <tr>
+        <td>{{ r['id'] }}</td>
+        <td><b>{{ r['issue'] }}</b></td>
+        <td>{{ r['severity'] }}</td>
+
+        <td>
+          <form class="inline" method="post" action="/update_status/{{ r['id'] }}">
+            <select name="status">
+              <option {{ 'selected' if r['status']=='New' else '' }}>New</option>
+              <option {{ 'selected' if r['status']=='In Review' else '' }}>In Review</option>
+              <option {{ 'selected' if r['status']=='Assigned' else '' }}>Assigned</option>
+              <option {{ 'selected' if r['status']=='Resolved' else '' }}>Resolved</option>
+            </select>
+            <br>
+            <select name="department">
+              <option {{ 'selected' if r['department']=='Roads Department' else '' }}>Roads Department</option>
+              <option {{ 'selected' if r['department']=='Sanitation Department' else '' }}>Sanitation Department</option>
+              <option {{ 'selected' if r['department']=='Water Works Department' else '' }}>Water Works Department</option>
+              <option {{ 'selected' if r['department']=='Review Team' else '' }}>Review Team</option>
+            </select>
+            <br><br>
+            <button type="submit">Update</button>
+          </form>
+        </td>
+
+        <td>{{ r['location'] }}</td>
+        <td>{{ r['description'] }}</td>
+        <td>
+          {% if r['latitude'] and r['longitude'] %}
+            {{ r['latitude'] }}, {{ r['longitude'] }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td>
+          <img src="{{ url_for('static', filename='uploads/' + r['image']) }}" width="110">
+        </td>
+        <td class="small">
+          <div><b>Created:</b> {{ r['created_at'] }}</div>
+          <div><b>Updated:</b> {{ r['updated_at'] }}</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <br>
+    <a href="/">Back to Home</a>
+  </div>
+</body>
+</html>

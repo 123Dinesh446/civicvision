@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Result</title>
+  <style>
+    body { background: white; font-family: Arial, sans-serif; text-align: center; color: black; }
+    .container { margin: 40px auto; width: 560px; padding: 22px; border: 1px solid #ccc; border-radius: 10px; }
+    img { margin-top: 12px; border-radius: 8px; border: 1px solid #ddd; }
+    .pill { display:inline-block; padding:6px 10px; border:1px solid #ddd; border-radius:999px; margin: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Detection Result</h1>
+  <div class="container">
+    <div class="pill"><b>Issue:</b> {{ prediction }}</div>
+    <div class="pill"><b>Severity:</b> {{ severity }}</div>
+    <div class="pill"><b>Status:</b> {{ status }}</div>
+    <div class="pill"><b>Department:</b> {{ department }}</div>
+
+    <p><b>Location:</b> {{ location }}</p>
+    {% if latitude and longitude %}
+      <p><b>GPS:</b> {{ latitude }}, {{ longitude }}</p>
+    {% endif %}
+    <p><b>Description:</b> {{ description }}</p>
+
+    <img src="{{ url_for('static', filename='uploads/' + image) }}" width="480">
+    <br><br>
+
+    <a href="/">Upload Another</a> |
+    <a href="/dashboard">View Dashboard</a>
+  </div>
+</body>
+</html>
